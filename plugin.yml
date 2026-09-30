@@ -1,0 +1,12 @@
+name: Binder
+main: RohaM\Binder\Loader
+version: 1.0.0
+api: ["5.0.0"]
+author: RohaM
+description: Save custom texts through a form and broadcast them to chat with a click.
+website: https://github.com/JustRohams
+
+permissions:
+  binder.use:
+    description: Allows usage of the /binder command
+    default: true
