@@ -1,26 +1,26 @@
-# 📘 Binder
+# 🎮 PlayerStatus
 
-> A lightweight, elegant **PocketMine-MP** plugin that lets players save their favorite texts and broadcast them to chat with a single click through a beautiful form UI.
+> A lightweight **PocketMine-MP** plugin that displays detailed player information — such as device, control mode, and ping — both via the `/player` command and through **ScoreHud** scoreboard tags.
 
 <p align="center">
   <img src="https://img.shields.io/badge/PocketMine--MP-5.0.0+-blue?style=for-the-badge" alt="PocketMine-MP">
   <img src="https://img.shields.io/badge/version-1.0.0-green?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/license-MIT-orange?style=for-the-badge" alt="License">
   <img src="https://img.shields.io/badge/author-RohaM-purple?style=for-the-badge" alt="Author">
+  <img src="https://img.shields.io/badge/ScoreHud-Supported-yellow?style=for-the-badge" alt="ScoreHud">
 </p>
 
 ---
 
 ## ✨ Features
 
-- 📝 **Save Custom Texts** — Players can store up to *N* custom messages (configurable).
-- 🎨 **Modern Form UI** — Smooth `SimpleForm` & `CustomForm` experience powered by **FormAPI**.
-- 🚀 **One-Click Broadcast** — Click any saved entry to instantly broadcast it in chat.
-- 💾 **Per-Player Data** — Each player's texts are safely stored in individual JSON files.
-- ⚡ **Smart Caching** — Entries are cached in memory for fast access and minimal disk I/O.
-- 🔒 **Permission Support** — Controlled via the `binder.use` permission node.
-- 🧹 **Clear Command** — Wipe all your saved entries with a single command.
-- 🛡️ **Input Sanitization** — Filenames are sanitized to prevent path traversal issues.
+- 🕹️ **Device Detection** — Shows the player's platform (Android, iOS, Windows, Xbox, etc.).
+- 🎛️ **Control Mode** — Detects how the player is playing (Touch, Keyboard, Controller).
+- 📱 **Device Model** — Displays the player's exact device model.
+- 📶 **Live Ping** — Real-time ping display in milliseconds.
+- 🖥️ **ScoreHud Integration** — Exposes dynamic tags for use in scoreboards.
+- ⚡ **Command Support** — Query any online player with a single command.
+- 🎨 **Colorful Console Banner** — A clean ASCII art banner on startup.
 
 ---
 
@@ -30,17 +30,19 @@
 |-------------|---------|
 | **PocketMine-MP** | `5.0.0` or higher |
 | **PHP** | `8.0+` |
-| **FormAPI** | [jojoe77777/FormAPI](https://github.com/jojoe77777/FormAPI) |
+| **ScoreHud** *(optional)* | Latest release of [ScoreHud](https://github.com/Ifera/ScoreHud) |
+
+> 💡 *ScoreHud is optional — the `/player` command works without it, but tags require ScoreHud to be installed.*
 
 ---
 
 ## 🛠️ Installation
 
-1. **Download** the latest release of `Binder.phar`.
+1. **Download** the latest release of `PlayerStatus.phar`.
 2. Drop the `.phar` file into your server's `plugins/` directory.
-3. Make sure **[FormAPI](https://github.com/jojoe77777/FormAPI)** is also installed in `plugins/`.
+3. *(Optional)* Install **[ScoreHud](https://github.com/Ifera/ScoreHud)** for scoreboard integration.
 4. Restart your server.
-5. Configure the plugin in `plugins/Binder/config.yml` if needed. ✅
+5. You're all set! ✅
 
 ---
 
@@ -50,30 +52,33 @@
 
 | Command | Description |
 |---------|-------------|
-| `/binder` | Opens your personal Binder menu |
-| `/binder add` | Opens a form to add a new text |
-| `/binder clear` | Clears all your saved texts |
+| `/player <name>` | Shows detailed status info about the specified player |
 
 ### Permissions
 
 | Permission | Description | Default |
 |------------|-------------|---------|
-| `binder.use` | Allows usage of the `/binder` command | `true` |
+| `playerstatus.command` | Allows usage of the `/player` command | `true` |
 
 ---
 
-## ⚙️ Configuration
+## 📊 ScoreHud Tags
+
+Once **ScoreHud** is installed, you can use these tags in your scoreboard configuration:
+
+| Tag | Description | Example Output |
+|-----|-------------|----------------|
+| `{playerstatus.device}` | Player's operating system | `Android`, `iOS`, `Windows 10` |
+| `{playerstatus.control}` | Player's current input mode | `Touch`, `Mouse & Keyboard`, `Controller` |
+| `{playerstatus.devicemodel}` | Player's device model | `Samsung Galaxy S21` |
+
+### Example ScoreHud Line
 
 ```yaml
-# plugins/Binder/config.yml
-
-# Maximum number of entries a player can save.
-# Set to 0 for unlimited.
-max-entries: 20
-
-# If true, saved texts are broadcast to the whole server.
-# If false, the text is only sent to the player.
-broadcast: true
+lines:
+  - "&bDevice: &f{playerstatus.device}"
+  - "&bControl: &f{playerstatus.control}"
+  - "&bModel: &f{playerstatus.devicemodel}"
 ```
 
 ---
@@ -81,14 +86,12 @@ broadcast: true
 ## 🧭 How It Works
 
 ```
-┌──────────────────┐
-│  /binder add     │──▶  CustomForm  ──▶  Saved to players/<name>.json
-└──────────────────┘
-┌──────────────────┐
-│  /binder         │──▶  SimpleForm  ──▶  Click a button
-└──────────────────┘                        │
-                                            ▼
-                                  Broadcast or send to chat
+┌─────────────────────┐
+│  /player <name>     │──▶  Fetches player info  ──▶  Sends formatted message
+└─────────────────────┘
+┌─────────────────────┐
+│   ScoreHud Tags     │──▶  TagsResolveEvent      ──▶  Injects live values
+└─────────────────────┘
 ```
 
 ---
@@ -96,43 +99,44 @@ broadcast: true
 ## 📁 Project Structure
 
 ```
-Binder/
+PlayerStatus/
 ├── plugin.yml
-├── resources/
-│   └── config.yml
 └── src/
     └── RohaM/
-        └── Binder/
+        └── PlayerStatus/
             ├── Loader.php
-            ├── commands/
-            │   └── BinderCommand.php
-            ├── manager/
-            │   └── DataManager.php
-            ├── forms/
-            │   ├── AddForm.php
-            │   └── ListForm.php
-            └── utils/
-                └── Banner.php
+            └── ScorehudEvent.php
 ```
 
 ---
 
-## 🧩 API Overview
+## 🧩 Device OS Reference
 
-### `DataManager`
+| ID | Platform |
+|----|----------|
+| 0 | Unknown |
+| 1 | Android |
+| 2 | iOS |
+| 3 | macOS |
+| 4 | FireOS |
+| 5 | GearVR |
+| 6 | HoloLens |
+| 7 | Windows 10 |
+| 8 | Windows |
+| 9 | Dedicated |
+| 10 | Orbis |
+| 11 | PlayStation 4 |
+| 12 | Nintendo Switch |
+| 13 | Xbox One |
 
-| Method | Description |
-|--------|-------------|
-| `getEntries(string $playerName): array` | Returns all saved entries for a player |
-| `addEntry(string $playerName, string $text): bool` | Adds a new entry (respects `max-entries`) |
-| `removeEntry(string $playerName, int $index): bool` | Removes an entry by index |
-| `clearEntries(string $playerName): void` | Deletes all entries for a player |
+## 🎛️ Control Mode Reference
 
-### `Loader`
-
-| Method | Description |
-|--------|-------------|
-| `getDataManager(): DataManager` | Returns the shared data manager instance |
+| ID | Control |
+|----|---------|
+| 0 | Unknown |
+| 1 | Mouse & Keyboard |
+| 2 | Touch |
+| 3 | Controller |
 
 ---
 
@@ -150,7 +154,7 @@ Contributions, issues, and feature requests are always welcome!
 
 ## 🐛 Bug Reports
 
-Found a bug? Please open an [issue](https://github.com/JustRohams/Binder/issues) with:
+Found a bug? Please open an [issue](https://github.com/JustRohams/PlayerStatus/issues) with:
 - Your PocketMine-MP version
 - Steps to reproduce
 - Console error logs (if any)

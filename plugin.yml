@@ -1,12 +1,18 @@
-name: Binder
-main: RohaM\Binder\Loader
+name: PlayerStatus
+main: RohaM\PlayerStatus\Loader
 version: 1.0.0
-api: ["5.0.0"]
+api: 5.0.0
 author: RohaM
-description: Save custom texts through a form and broadcast them to chat with a click.
+description: Display player information
 website: https://github.com/JustRohams
 
 permissions:
-  binder.use:
-    description: Allows usage of the /binder command
+  playerstatus.command:
     default: true
+    description: Allow using /player command
+
+commands:
+  player:
+    description: perm for cmd
+    usage: "/player <name>"
+    permission: playerstatus.command
