@@ -6,8 +6,8 @@ namespace RohaM\Logger\listeners;
 
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerChatEvent;
-use pocketmine\event\player\PlayerCommandPreprocessEvent;
 use pocketmine\event\player\PlayerQuitEvent;
+use pocketmine\event\server\CommandEvent;
 use RohaM\Logger\managers\LoggerManager;
 
 class PlayerEventListener implements Listener {
@@ -26,12 +26,17 @@ class PlayerEventListener implements Listener {
         $this->manager->logChat($player->getName(), $event->getMessage());
     }
 
-    public function onCommandPreprocess(PlayerCommandPreprocessEvent $event): void {
-        $player = $event->getPlayer();
+    public function onCommand(CommandEvent $event): void {
+        $sender = $event->getSender();
+        if (!$sender->getPlayer() instanceof \pocketmine\player\Player) {
+            return;
+        }
+        $player = $sender->getPlayer();
         if (!$player->isConnected()) {
             return;
         }
-        $this->manager->logCommand($player->getName(), $event->getMessage());
+
+        $this->manager->logCommand($player->getName(), "/" . $event->getCommand());
     }
 
     public function onQuit(PlayerQuitEvent $event): void {
