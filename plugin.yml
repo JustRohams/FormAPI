@@ -1,18 +1,13 @@
-name: PlayerStatus
-main: RohaM\PlayerStatus\Loader
+name: Logger
+main: RohaM\Logger\Loader
 version: 1.0.0
 api: 5.0.0
 author: RohaM
-description: Display player information
+description: Logs every player's chat messages and commands into a per-player JSON file.
 website: https://github.com/JustRohams
+load: POSTWORLD
 
 permissions:
-  playerstatus.command:
-    default: true
-    description: Allow using /player command
-
-commands:
-  player:
-    description: perm for cmd
-    usage: "/player <name>"
-    permission: playerstatus.command
+  logger.command:
+    description: Allows using the /logger command.
+    default: op

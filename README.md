@@ -1,182 +1,126 @@
-# 🎮 PlayerStatus
+# Logger
 
-> A lightweight **PocketMine-MP** plugin that displays detailed player information — such as device, control mode, and ping — both via the `/player` command and through **ScoreHud** scoreboard tags.
+A lightweight [PocketMine-MP 5](https://github.com/pmmp/PocketMine-MP) plugin that logs **every chat message and command** a player sends into a **per-player JSON file** inside `plugin_data`.
 
-<p align="center">
-  <img src="https://img.shields.io/badge/PocketMine--MP-5.0.0+-blue?style=for-the-badge" alt="PocketMine-MP">
-  <img src="https://img.shields.io/badge/version-1.0.0-green?style=for-the-badge" alt="Version">
-  <img src="https://img.shields.io/badge/license-MIT-orange?style=for-the-badge" alt="License">
-  <img src="https://img.shields.io/badge/author-RohaM-purple?style=for-the-badge" alt="Author">
-  <img src="https://img.shields.io/badge/ScoreHud-Supported-yellow?style=for-the-badge" alt="ScoreHud">
-</p>
+**Author:** RohaM
+**API:** 5.0.0
+**License:** MIT
 
 ---
 
 ## ✨ Features
 
-- 🕹️ **Device Detection** — Shows the player's platform (Android, iOS, Windows, Xbox, etc.).
-- 🎛️ **Control Mode** — Detects how the player is playing (Touch, Keyboard, Controller).
-- 📱 **Device Model** — Displays the player's exact device model.
-- 📶 **Live Ping** — Real-time ping display in milliseconds.
-- 🖥️ **ScoreHud Integration** — Exposes dynamic tags for use in scoreboards.
-- ⚡ **Command Support** — Query any online player with a single command.
-- 🎨 **Colorful Console Banner** — A clean ASCII art banner on startup.
+- 📝 Logs **all chat messages** sent by players
+- ⌨️ Logs **all commands** executed by players (including plugin commands)
+- 📁 Creates **one JSON file per player**, named after the player (e.g. `RohaM.json`)
+- 💾 Optional auto-save interval + save-on-quit + save-on-disable
+- 🔒 Atomic writes (temp file + `rename`) to prevent file corruption
+- 🧹 Built-in `/logger` command for viewing / clearing / reloading logs
+- ⚡ Lightweight, no database required
+- 🧩 Clean, multi-file namespaced code (`RohaM\Logger\*`)
+- 🛠️ Fully configurable (`config.yml`)
 
 ---
 
-## 📦 Requirements
+## 📂 Data Structure
 
-| Requirement | Version |
-|-------------|---------|
-| **PocketMine-MP** | `5.0.0` or higher |
-| **PHP** | `8.0+` |
-| **ScoreHud** *(optional)* | Latest release of [ScoreHud](https://github.com/Ifera/ScoreHud) |
+Files are stored at:
 
-> 💡 *ScoreHud is optional — the `/player` command works without it, but tags require ScoreHud to be installed.*
+```
+plugins/Logger/plugin_data/players/<PlayerName>.json
+```
 
----
+Example — `plugin_data/players/RohaM.json`:
 
-## 🛠️ Installation
+```json
+[
+    {
+        "type": "chat",
+        "content": "Hello everyone!",
+        "time": "2025-01-15 21:34:11",
+        "timestamp": 1736969651
+    },
+    {
+        "type": "command",
+        "content": "/gamemode creative",
+        "time": "2025-01-15 21:34:25",
+        "timestamp": 1736969665
+    }
+]
+```
 
-1. **Download** the latest release of `PlayerStatus.phar`.
-2. Drop the `.phar` file into your server's `plugins/` directory.
-3. *(Optional)* Install **[ScoreHud](https://github.com/Ifera/ScoreHud)** for scoreboard integration.
-4. Restart your server.
-5. You're all set! ✅
-
----
-
-## 🎮 Commands & Permissions
-
-### Commands
-
-| Command | Description |
-|---------|-------------|
-| `/player <name>` | Shows detailed status info about the specified player |
-
-### Permissions
-
-| Permission | Description | Default |
-|------------|-------------|---------|
-| `playerstatus.command` | Allows usage of the `/player` command | `true` |
+| Field       | Description                            |
+|-------------|----------------------------------------|
+| `type`      | `chat` or `command`                    |
+| `content`   | The raw message or command text        |
+| `time`      | Human-readable timestamp               |
+| `timestamp` | Unix timestamp (for external tooling)  |
 
 ---
 
-## 📊 ScoreHud Tags
+## 🚀 Installation
 
-Once **ScoreHud** is installed, you can use these tags in your scoreboard configuration:
+1. Download or clone this repository.
+2. Put the `Logger` folder inside your server's `plugins/` directory.
+3. Restart the server.
+4. Logs will automatically appear at:
+   ```
+   plugins/Logger/plugin_data/players/<PlayerName>.json
+   ```
 
-| Tag | Description | Example Output |
-|-----|-------------|----------------|
-| `{playerstatus.device}` | Player's operating system | `Android`, `iOS`, `Windows 10` |
-| `{playerstatus.control}` | Player's current input mode | `Touch`, `Mouse & Keyboard`, `Controller` |
-| `{playerstatus.devicemodel}` | Player's device model | `Samsung Galaxy S21` |
+---
 
-### Example ScoreHud Line
+## ⚙️ Commands
+
+| Command                          | Description                     | Permission       |
+|----------------------------------|---------------------------------|------------------|
+| `/logger view <player>`          | Show log entry count + filepath | `logger.command` |
+| `/logger clear <player>`         | Delete a player's log file      | `logger.command` |
+| `/logger reload`                 | Reload `config.yml`             | `logger.command` |
+
+Aliases: `/logs`, `/log`
+
+---
+
+## 🔧 Configuration (`config.yml`)
 
 ```yaml
-lines:
-  - "&bDevice: &f{playerstatus.device}"
-  - "&bControl: &f{playerstatus.control}"
-  - "&bModel: &f{playerstatus.devicemodel}"
+log-chat: true
+log-commands: true
+save-interval: 300
+date-format: "Y-m-d H:i:s"
+max-entries: 0
+ignored-players: []
+ignored-commands: []
 ```
+
+- `save-interval` — seconds between auto-saves (`0` to disable).
+- `max-entries` — maximum entries kept per player (`0` = unlimited).
+- `ignored-commands` — command names without leading `/`.
 
 ---
 
-## 🧭 How It Works
+## 🧱 Architecture
 
-```
-┌─────────────────────┐
-│  /player <name>     │──▶  Fetches player info  ──▶  Sends formatted message
-└─────────────────────┘
-┌─────────────────────┐
-│   ScoreHud Tags     │──▶  TagsResolveEvent      ──▶  Injects live values
-└─────────────────────┘
-```
-
----
-
-## 📁 Project Structure
-
-```
-PlayerStatus/
-├── plugin.yml
-└── src/
-    └── RohaM/
-        └── PlayerStatus/
-            ├── Loader.php
-            └── ScorehudEvent.php
-```
+| Class                    | Namespace                          | Responsibility                                            |
+|--------------------------|------------------------------------|-----------------------------------------------------------|
+| `Loader`                 | `RohaM\Logger`                     | Plugin bootstrap, config, command & event registration    |
+| `LoggerManager`          | `RohaM\Logger\managers`            | Holds all `PlayerLogger` instances, filters, save-all     |
+| `PlayerLogger`           | `RohaM\Logger\loggers`             | Load / append / atomic-save one player's JSON file        |
+| `PlayerEventListener`    | `RohaM\Logger\listeners`           | Handles chat, command-preprocess, and quit events         |
+| `AutoSaveTask`           | `RohaM\Logger\tasks`               | Periodically flushes dirty logs                           |
+| `LoggerCommand`          | `RohaM\Logger\commands`            | Implements `/logger` subcommands                          |
+| `FileUtils`              | `RohaM\Logger\utils`               | Atomic file-write helper                                  |
 
 ---
 
-## 🧩 Device OS Reference
+## ✅ Requirements
 
-| ID | Platform |
-|----|----------|
-| 0 | Unknown |
-| 1 | Android |
-| 2 | iOS |
-| 3 | macOS |
-| 4 | FireOS |
-| 5 | GearVR |
-| 6 | HoloLens |
-| 7 | Windows 10 |
-| 8 | Windows |
-| 9 | Dedicated |
-| 10 | Orbis |
-| 11 | PlayStation 4 |
-| 12 | Nintendo Switch |
-| 13 | Xbox One |
-
-## 🎛️ Control Mode Reference
-
-| ID | Control |
-|----|---------|
-| 0 | Unknown |
-| 1 | Mouse & Keyboard |
-| 2 | Touch |
-| 3 | Controller |
-
----
-
-## 🤝 Contributing
-
-Contributions, issues, and feature requests are always welcome!
-
-1. Fork the repository 🍴
-2. Create your feature branch: `git checkout -b feature/amazing-feature`
-3. Commit your changes: `git commit -m 'Add some amazing feature'`
-4. Push to the branch: `git push origin feature/amazing-feature`
-5. Open a Pull Request 🚀
-
----
-
-## 🐛 Bug Reports
-
-Found a bug? Please open an [issue](https://github.com/JustRohams/PlayerStatus/issues) with:
-- Your PocketMine-MP version
-- Steps to reproduce
-- Console error logs (if any)
+- PocketMine-MP **5.0.0+**
+- PHP **8.1+**
 
 ---
 
 ## 📜 License
 
-This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
-
----
-
-## 👤 Author
-
-**RohaM**
-
-- 🌐 GitHub: [@JustRohams](https://github.com/JustRohams)
-
----
-
-<p align="center">
-  Made with ❤️ for the PocketMine community
-  <br>
-  <sub>⭐ If you like this plugin, don't forget to star the repo!</sub>
-</p>
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
