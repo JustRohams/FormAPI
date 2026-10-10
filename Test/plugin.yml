@@ -1,0 +1,16 @@
+name: FormAPITest
+main: RohaM\FormAPITest\FormAPITest
+version: 1.1.0
+api: ["5.0.0"]
+author: RohaM
+description: Test plugin for FormAPI Persian fork — includes debug tools
+depend: ["FormAPI"]
+website: https://github.com/JustRohams/FormAPI
+
+permissions:
+  formapitest.use:
+    description: Allows using the test command
+    default: true
+  formapitest.admin:
+    description: Allows toggling Persian engine
+    default: op

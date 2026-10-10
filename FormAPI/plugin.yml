@@ -1,0 +1,8 @@
+name: FormAPI
+main: jojoe77777\FormAPI\FormAPI
+version: 2.0.0
+api: ["5.0.0"]
+author: ["Jojoe77777", "RohaM"]
+description: FormAPI fork with automatic Persian (Farsi) text shaping and RTL support
+website: https://github.com/JustRohams/FormAPI
+load: POSTWORLD

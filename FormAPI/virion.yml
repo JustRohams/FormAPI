@@ -1,0 +1,8 @@
+name: FormAPI
+version: 2.0.0
+antigen: jojoe77777\FormAPI
+api: ["5.0.0"]
+php: [8.1]
+authors:
+  - Jojoe77777
+  - RohaM
