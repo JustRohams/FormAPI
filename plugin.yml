@@ -1,13 +1,15 @@
-name: Logger
-main: RohaM\Logger\Loader
+name: GiftCode
+main: RohaM\GiftCode\Loader
 version: 1.0.0
-api: 5.0.0
+api: ["5.0.0"]
 author: RohaM
-description: Logs every player's chat messages and commands into a per-player JSON file.
-website: https://github.com/JustRohams
-load: POSTWORLD
+description: Gift code plugin with EconomyAPI support
+depend: ["EconomyAPI"]
 
 permissions:
-  logger.command:
-    description: Allows using the /logger command.
+  giftcode.create:
+    description: Allows creating gift codes
     default: op
+  giftcode.use:
+    description: Allows using gift codes
+    default: true
